@@ -5,18 +5,19 @@ PID Controller for vehicle steering on a racetrack. Simulated vehicle is provide
 
 ## Reflection
 
-PID Control parameter behavior when applied to vehicle steering:
-P: 
+PID Control parameter behavior when applied to vehicle steering
+
+### P 
 * Controls the magnitude of steering correction based on deviation from desired trajectory.
 * Setting this parameter too high will cause over-correction and overshoot of desired trajectory
 * Setting this parameter too low will result in sluggish reaction during rapid trajectory changes (e.g. a turn)
 
-I:
+### I
 * Acts to dampen over correction and converge output towards a zero-error offset
 * Setting this parameter too high will result in over-correction during small periods of sustained error.
 * Setting this parameter too low will result in the vehicle tolerating sustained trajectory error for unacceptably long periods.  Can result in following an overly approximated trajectory.
 
-D:
+### D
 * Acts to control the rate of change of the steering correction over time, and reduce overshoot.  Rapid rates of change in the input (high frequency components) can cause instability.
 * Setting this parameter too high will result in over-sensitivity to rapid (or "noisy") swings in input error and correctional output
 * Setting this parameter too low will result in overshoot and oscillating output corrections, which is especially undesireable for steering a vehcile
@@ -43,10 +44,17 @@ Chosen Parameters:
 * Uses basic throttle control. CTE < .5 ? throttle=75% : throttle=50%
 * Final parameters chosen as best overall performance
 
+### Controller Performance
+* Purple  = CTE
+* Green   = Input Steering Angle
+* Blue    = PID Output Steering Angle correction 
+* Yellow  = Average CTE
+
+![Controller Performance](PID_Performance.png?raw=true)
 
 Other Conclusions:
 
-PID control is an ultimately poor choise for master steering control in part due to the inevitable tradeoff between responsiveness and stability.  The nature of the available data (only current error vs. desired trajectory) means that the control algorithm cannot anticipate, e.g. the sharpness or duration of curves, and further is attempting to converge on a "moving target".  The control algorithm can only react, and as such will always be trailing or "chasing" what would have been the optimal output at any given time step.
+PID control is an ultimately poor choise for master steering control in part due to the inevitable tradeoff between responsiveness and stability.  The nature of the available data (only current error vs. desired trajectory) means that the control algorithm cannot anticipate, e.g. the sharpness or duration of curves, and further is attempting to converge on a "moving target".  The control algorithm can only react, and as such will always be trailing or "chasing" what would have been the optimal output at any given time step.  Also, using derivate gain on CTE data is extremely noisy.  Overall "smoothness" of output would benefit from low-pass filtering of CTE values. 
 
 
 ---
