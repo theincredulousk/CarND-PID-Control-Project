@@ -7,6 +7,7 @@ class PID {
    * Constructor
    */
   PID();
+  PID(double Kp_, double Ki_, double Kd_);
 
   /**
    * Destructor.
@@ -21,9 +22,15 @@ class PID {
 
   /**
    * Update the PID error variables given cross track error.
-   * @param cte The current cross track error
+   * @param CrossTrackError The current cross track error
    */
-  void UpdateError(double cte);
+  void UpdateError(double CrossTrackError);
+
+    /**
+   * Return the steering correction [-1,1] given the current cross track error and the PID coefficients.
+   * @param CrossTrackError The current cross track error
+   */
+  double Steer(double CrossTrackError);
 
   /**
    * Calculate the total PID error.
@@ -32,6 +39,10 @@ class PID {
   double TotalError();
 
  private:
+  double worst_cte;
+  double best_cte;
+  double prev_cte;
+
   /**
    * PID Errors
    */

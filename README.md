@@ -1,6 +1,54 @@
 # CarND-Controls-PID
 Self-Driving Car Engineer Nanodegree Program
 
+PID Controller for vehicle steering on a racetrack. Simulated vehicle is provided with a stream of cross-track error data and no additional spatial / localization data.
+
+## Reflection
+
+PID Control parameter behavior when applied to vehicle steering:
+P: 
+* Controls the magnitude of steering correction based on deviation from desired trajectory.
+* Setting this parameter too high will cause over-correction and overshoot of desired trajectory
+* Setting this parameter too low will result in sluggish reaction during rapid trajectory changes (e.g. a turn)
+
+I:
+* Acts to dampen over correction and converge output towards a zero-error offset
+* Setting this parameter too high will result in over-correction during small periods of sustained error.
+* Setting this parameter too low will result in the vehicle tolerating sustained trajectory error for unacceptably long periods.  Can result in following an overly approximated trajectory.
+
+D:
+* Acts to control the rate of change of the steering correction over time, and reduce overshoot.  Rapid rates of change in the input (high frequency components) can cause instability.
+* Setting this parameter too high will result in over-sensitivity to rapid (or "noisy") swings in input error and correctional output
+* Setting this parameter too low will result in overshoot and oscillating output corrections, which is especially undesireable for steering a vehcile
+
+
+Chosen Parameters:
+(P=0.45, I=0.0036, D=11.25)
+* Derived from Ziegler–Nichols method to set parameters
+* Achieves impressively low average CTE
+* "Ride quality" is unrealistic - movement is jittery and aggressive
+* May have worked with a low-pass filter applied to input signal for derivate gain
+* Instability means laps can only be completed at 50% throttle to maintain traction
+
+(P=0.075, I=0.00005, D=4)
+* Derived from experimentation after initial parameters of (0.01, 0.0001, 10)
+* Achieves relatively poor average CTE (0.4) but stable/smoother trajectory
+* Compromise made against "smoothness" with P gain in order to manuver sharp corners at speed
+* Able to complete laps at constant 75% throttle (about 73-75mph)
+* With some tweaking the car can make most of the track at 100% throttle, but crashes on the last turn
+
+(P=0.0655, I=0.0004, D=3)
+* Derived from heuristic setting Kd and Ki to 0 initially, and then increasing until instability one at a time.  Kd increased until response is not too sluggish while maintaining stability
+* Best average CTE achieved over one lap - .038
+* Uses basic throttle control. CTE < .5 ? throttle=75% : throttle=50%
+* Final parameters chosen as best overall performance
+
+
+Other Conclusions:
+
+PID control is an ultimately poor choise for master steering control in part due to the inevitable tradeoff between responsiveness and stability.  The nature of the available data (only current error vs. desired trajectory) means that the control algorithm cannot anticipate, e.g. the sharpness or duration of curves, and further is attempting to converge on a "moving target".  The control algorithm can only react, and as such will always be trailing or "chasing" what would have been the optimal output at any given time step.
+
+
 ---
 
 ## Dependencies
@@ -34,65 +82,6 @@ Fellow students have put together a guide to Windows set-up for the project [her
 2. Make a build directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
 4. Run it: `./pid`. 
+5. Run the simulator and select the PID Controller Environment
 
-Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
-
-## Editor Settings
-
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
-
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
-
-## Code Style
-
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
-
-## Hints!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
 
